@@ -1,6 +1,14 @@
+import { View, Text } from "react-native"
 import React from "react"
 import { Tabs } from "expo-router"
 import { MaterialIcons } from "@expo/vector-icons"
+
+const tabs = [
+  { name: "home", icon: "home", title: "Home" },
+  { name: "recipes", icon: "restaurant", title: "Recipes" },
+  { name: "search", icon: "search", title: "Search" },
+  { name: "profile", icon: "person", title: "Profile" }
+] as const
 
 const DashboardLayout = () => {
   return (
@@ -8,50 +16,29 @@ const DashboardLayout = () => {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: "#f97316",
-        tabBarInactiveTintColor: "#9ca3af",
+        tabBarInactiveTintColor: "#6b7280",
         tabBarStyle: {
           backgroundColor: "#ffffff",
           borderTopWidth: 1,
-          borderTopColor: "#f3f4f6",
+          borderTopColor: "#e5e7eb",
+          height: 60,
+          paddingBottom: 8,
+          paddingTop: 8
         }
       }}
     >
-      <Tabs.Screen
-        name="home"
-        options={{
-          tabBarLabel: "Home",
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="home" color={color} size={size} />
-          )
-        }}
-      />
-      <Tabs.Screen
-        name="recipes"
-        options={{
-          tabBarLabel: "Recipes",
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="restaurant" color={color} size={size} />
-          )
-        }}
-      />
-      <Tabs.Screen
-        name="about"
-        options={{
-          tabBarLabel: "About",
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="info" color={color} size={size} />
-          )
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          tabBarLabel: "Profile",
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="person" color={color} size={size} />
-          )
-        }}
-      />
+      {tabs.map((tab) => (
+        <Tabs.Screen
+          key={tab.name}
+          name={tab.name}
+          options={{
+            title: tab.title,
+            tabBarIcon: ({ color, size }) => (
+              <MaterialIcons name={tab.icon} color={color} size={size} />
+            )
+          }}
+        />
+      ))}
     </Tabs>
   )
 }

@@ -23,20 +23,15 @@ const Register = () => {
 
   const handleRegister = async () => {
     if (!name || !email || !password || !conPassword || isLoading) {
-      Alert.alert("Please fill all fields")
+      Alert.alert("Please fill all fields...!")
       return
     }
-    
+
     if (password !== conPassword) {
-      Alert.alert("Passwords do not match")
+      Alert.alert("Passwords do not match...!")
       return
     }
-    
-    if (password.length < 6) {
-      Alert.alert("Password should be at least 6 characters")
-      return
-    }
-    
+
     showLoader()
     try {
       await registerUser(name, email, password)
@@ -53,18 +48,15 @@ const Register = () => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <View className="flex-1 justify-center items-center bg-gradient-to-b from-orange-50 to-white p-6">
-        <View className="w-full max-w-md bg-white/80 backdrop-blur-md rounded-2xl p-8 shadow-lg">
-          <Text className="text-3xl font-bold mb-2 text-center text-gray-900">
+        <View className="w-full bg-white/80 backdrop-blur-md rounded-2xl p-8 shadow-lg">
+          <Text className="text-3xl font-bold mb-6 text-center text-gray-900">
             Create Account
-          </Text>
-          <Text className="text-gray-600 text-center mb-8">
-            Join our recipe community
           </Text>
           
           <TextInput
             placeholder="Full Name"
             placeholderTextColor="#6B7280"
-            className="border-2 border-gray-200 bg-white p-4 mb-4 rounded-xl text-gray-800"
+            className="border border-gray-300 p-4 mb-4 rounded-xl"
             value={name}
             onChangeText={setName}
           />
@@ -72,7 +64,7 @@ const Register = () => {
           <TextInput
             placeholder="Email"
             placeholderTextColor="#6B7280"
-            className="border-2 border-gray-200 bg-white p-4 mb-4 rounded-xl text-gray-800"
+            className="border border-gray-300 p-4 mb-4 rounded-xl"
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
@@ -82,35 +74,36 @@ const Register = () => {
           <TextInput
             placeholder="Password"
             placeholderTextColor="#6B7280"
-            secureTextEntry
-            className="border-2 border-gray-200 bg-white p-4 mb-4 rounded-xl text-gray-800"
+            className="border border-gray-300 p-4 mb-4 rounded-xl"
             value={password}
             onChangeText={setPassword}
+            secureTextEntry
           />
           
           <TextInput
             placeholder="Confirm Password"
             placeholderTextColor="#6B7280"
-            secureTextEntry
-            className="border-2 border-gray-200 bg-white p-4 mb-6 rounded-xl text-gray-800"
+            className="border border-gray-300 p-4 mb-6 rounded-xl"
             value={conPassword}
             onChangeText={setConPassword}
+            secureTextEntry
           />
           
           <Pressable
-            className={`bg-orange-500 px-6 py-4 rounded-2xl ${isLoading ? 'opacity-70' : ''}`}
+            className="bg-orange-500 px-6 py-4 rounded-2xl"
             onPress={handleRegister}
-            disabled={isLoading}
           >
             <Text className="text-white text-lg font-semibold text-center">
-              {isLoading ? "Creating..." : "Create Account"}
+              {isLoading ? "Creating account..." : "Register"}
             </Text>
           </Pressable>
           
           <View className="flex-row justify-center mt-6">
             <Text className="text-gray-700">Already have an account? </Text>
-            <TouchableOpacity onPress={() => router.back()}>
-              <Text className="text-orange-600 font-semibold">Sign In</Text>
+            <TouchableOpacity
+              onPress={() => router.back()}
+            >
+              <Text className="text-orange-600 font-semibold">Login</Text>
             </TouchableOpacity>
           </View>
         </View>

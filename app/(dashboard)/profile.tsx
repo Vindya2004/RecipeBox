@@ -1,29 +1,13 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  TextInput,
-  ActivityIndicator
-} from "react-native"
-import React, { useState } from "react"
+import { View, Text, TouchableOpacity, Alert, ScrollView } from "react-native"
+import React from "react"
 import { MaterialIcons } from "@expo/vector-icons"
 import { useRouter } from "expo-router"
 import { useAuth } from "@/hooks/useAuth"
-import { useLoader } from "@/hooks/useLoader"
 import { logoutUser } from "@/services/authService"
-import { updateProfile } from "firebase/auth"
-import { auth } from "@/services/firebase"
 
 const Profile = () => {
   const router = useRouter()
   const { user } = useAuth()
-  const { showLoader, hideLoader } = useLoader()
-  
-  const [isEditing, setIsEditing] = useState(false)
-  const [name, setName] = useState(user?.displayName || "")
-  const [loading, setLoading] = useState(false)
 
   const handleLogout = async () => {
     Alert.alert(
@@ -35,14 +19,11 @@ const Profile = () => {
           text: "Logout",
           style: "destructive",
           onPress: async () => {
-            showLoader()
             try {
               await logoutUser()
               router.replace("/login")
             } catch (error) {
               Alert.alert("Error", "Failed to logout")
-            } finally {
-              hideLoader()
             }
           }
         }
@@ -50,179 +31,73 @@ const Profile = () => {
     )
   }
 
-  const handleUpdateProfile = async () => {
-    if (!name.trim()) {
-      Alert.alert("Error", "Name cannot be empty")
-      return
-    }
-
-    setLoading(true)
-    try {
-      await updateProfile(auth.currentUser!, {
-        displayName: name
-      })
-      
-      Alert.alert("Success", "Profile updated successfully")
-      setIsEditing(false)
-    } catch (error) {
-      Alert.alert("Error", "Failed to update profile")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const menuItems = [
-    {
-      icon: "history",
-      title: "Recipe History",
-      onPress: () => router.push("/recipes")
-    },
-    {
-      icon: "favorite",
-      title: "Favorite Recipes",
-      onPress: () => Alert.alert("Coming Soon", "This feature will be available soon")
-    },
-    {
-      icon: "settings",
-      title: "Settings",
-      onPress: () => Alert.alert("Settings", "Settings will be available in next update")
-    },
-    {
-      icon: "help",
-      title: "Help & Support",
-      onPress: () => router.push("/about")
-    }
-  ]
-
   return (
     <ScrollView className="flex-1 bg-gray-50">
-      {/* Header */}
-      <View className="bg-gradient-to-r from-orange-500 to-amber-500 px-6 pt-12 pb-8">
+      {/* Profile Header */}
+      <View className="bg-orange-500 p-8 rounded-b-3xl">
         <View className="items-center">
-          <View className="bg-white/20 p-4 rounded-full">
-            <MaterialIcons name="person" size={64} color="white" />
+          <View className="bg-white p-4 rounded-full">
+            <MaterialIcons name="person" size={64} color="#f97316" />
           </View>
-          
-          {isEditing ? (
-            <View className="mt-4 w-full max-w-xs">
-              <TextInput
-                value={name}
-                onChangeText={setName}
-                className="bg-white p-3 rounded-xl text-gray-800 text-center font-semibold"
-                placeholder="Enter your name"
-              />
-              <View className="flex-row justify-center mt-3 space-x-3">
-                <TouchableOpacity
-                  onPress={() => setIsEditing(false)}
-                  className="bg-gray-500 px-4 py-2 rounded-xl"
-                >
-                  <Text className="text-white">Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={handleUpdateProfile}
-                  disabled={loading}
-                  className="bg-green-500 px-4 py-2 rounded-xl"
-                >
-                  {loading ? (
-                    <ActivityIndicator size="small" color="white" />
-                  ) : (
-                    <Text className="text-white">Save</Text>
-                  )}
-                </TouchableOpacity>
-              </View>
-            </View>
-          ) : (
-            <>
-              <Text className="text-white text-xl font-bold mt-4">
-                {user?.displayName || "User"}
-              </Text>
-              <Text className="text-white/90 mt-1">
-                {user?.email}
-              </Text>
-              <TouchableOpacity
-                onPress={() => setIsEditing(true)}
-                className="mt-3 bg-white/20 px-4 py-2 rounded-full"
-              >
-                <Text className="text-white">Edit Profile</Text>
-              </TouchableOpacity>
-            </>
-          )}
+          <Text className="text-white text-2xl font-bold mt-4">
+            {user?.displayName || "User"}
+          </Text>
+          <Text className="text-orange-100 mt-2">{user?.email}</Text>
         </View>
       </View>
 
       {/* Stats */}
-      <View className="px-6 -mt-6">
-        <View className="flex-row justify-around">
-          <View className="bg-white rounded-2xl p-4 shadow-lg w-28 items-center">
+      <View className="mx-6 -mt-8 bg-white rounded-2xl shadow-lg p-6">
+        <View className="flex-row justify-between">
+          <View className="items-center">
             <Text className="text-2xl font-bold text-gray-800">0</Text>
-            <Text className="text-gray-600 text-sm">Recipes</Text>
+            <Text className="text-gray-600 mt-1">Recipes</Text>
           </View>
-          <View className="bg-white rounded-2xl p-4 shadow-lg w-28 items-center">
+          <View className="items-center">
             <Text className="text-2xl font-bold text-gray-800">0</Text>
-            <Text className="text-gray-600 text-sm">Favorites</Text>
+            <Text className="text-gray-600 mt-1">Favorites</Text>
           </View>
-          <View className="bg-white rounded-2xl p-4 shadow-lg w-28 items-center">
+          <View className="items-center">
             <Text className="text-2xl font-bold text-gray-800">0</Text>
-            <Text className="text-gray-600 text-sm">Categories</Text>
+            <Text className="text-gray-600 mt-1">Reviews</Text>
           </View>
         </View>
       </View>
 
-      {/* Menu Items */}
-      <View className="p-6">
-        <Text className="text-xl font-bold text-gray-800 mb-4">Menu</Text>
-        <View className="space-y-3">
-          {menuItems.map((item, index) => (
-            <TouchableOpacity
-              key={index}
-              onPress={item.onPress}
-              className="bg-white rounded-2xl p-4 flex-row items-center shadow-sm"
-            >
-              <MaterialIcons name={item.icon} size={24} color="#f97316" />
-              <Text className="ml-4 text-gray-700 flex-1">{item.title}</Text>
-              <MaterialIcons name="chevron-right" size={24} color="#9ca3af" />
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Logout Button */}
-        <TouchableOpacity
-          onPress={handleLogout}
-          className="bg-red-500 rounded-2xl p-4 mt-8 flex-row justify-center items-center"
-        >
-          <MaterialIcons name="logout" size={20} color="white" />
-          <Text className="text-white font-semibold ml-2">Logout</Text>
-        </TouchableOpacity>
-
-        {/* Account Info */}
-        <View className="bg-white rounded-2xl p-4 mt-6 shadow-sm">
-          <Text className="font-semibold text-gray-800 mb-2">Account Information</Text>
-          <View className="space-y-2">
-            <View className="flex-row">
-              <Text className="text-gray-600 w-24">Email:</Text>
-              <Text className="text-gray-800 flex-1">{user?.email}</Text>
-            </View>
-            <View className="flex-row">
-              <Text className="text-gray-600 w-24">User ID:</Text>
-              <Text className="text-gray-800 flex-1 text-sm" numberOfLines={1}>
-                {user?.uid}
-              </Text>
-            </View>
-            <View className="flex-row">
-              <Text className="text-gray-600 w-24">Verified:</Text>
-              <Text className={`${user?.emailVerified ? 'text-green-600' : 'text-yellow-600'}`}>
-                {user?.emailVerified ? 'Yes' : 'No'}
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* App Info */}
-        <View className="items-center mt-8 mb-12">
-          <Text className="text-gray-500">Recipe Finder App</Text>
-          <Text className="text-gray-500 text-sm mt-1">Version 1.0.0</Text>
-        </View>
+      {/* Menu Options */}
+      <View className="mt-8 mx-6">
+        <Text className="text-xl font-bold text-gray-800 mb-4">Account</Text>
+        
+        {[
+          { icon: "restaurant", label: "My Recipes", onPress: () => router.push("/recipes") },
+          { icon: "favorite", label: "Favorites", onPress: () => Alert.alert("Coming Soon") },
+          { icon: "history", label: "Recent Views", onPress: () => Alert.alert("Coming Soon") },
+          { icon: "settings", label: "Settings", onPress: () => Alert.alert("Coming Soon") },
+          { icon: "help", label: "Help & Support", onPress: () => Alert.alert("Coming Soon") },
+          { icon: "info", label: "About", onPress: () => router.push("/about") },
+        ].map((item, index) => (
+          <TouchableOpacity
+            key={index}
+            className="flex-row items-center bg-white p-4 rounded-xl mb-3"
+            onPress={item.onPress}
+          >
+            <MaterialIcons name={item.icon as any} size={24} color="#6b7280" />
+            <Text className="text-gray-800 ml-4 flex-1">{item.label}</Text>
+            <MaterialIcons name="chevron-right" size={20} color="#9ca3af" />
+          </TouchableOpacity>
+        ))}
       </View>
+
+      {/* Logout Button */}
+      <TouchableOpacity
+        className="mx-6 my-8 bg-red-500 p-4 rounded-xl flex-row items-center justify-center"
+        onPress={handleLogout}
+      >
+        <MaterialIcons name="logout" size={20} color="#fff" />
+        <Text className="text-white font-semibold ml-2">Logout</Text>
+      </TouchableOpacity>
+
+      <View className="h-8" />
     </ScrollView>
   )
 }
