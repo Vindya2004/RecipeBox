@@ -23,7 +23,14 @@ const DashboardLayout = () => {
           borderTopColor: "#e5e7eb",
           height: 60,
           paddingBottom: 8,
-          paddingTop: 8
+          paddingTop: 8,
+          position:'absolute',
+          bottom:25,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 10 },
+          shadowOpacity: 0.25,
+          shadowRadius: 16,
+          elevation: 12,
         }
       }}
     >

@@ -295,7 +295,7 @@ const RecipeForm = () => {
 
         {/* Submit Button */}
         <Pressable
-          className={`mt-8 px-6 py-4 rounded-2xl ${recipeId ? "bg-orange-500" : "bg-green-500"}`}
+          className={`mt-8 px-6 py-4 rounded-2xl position-absolute bottom-10 ${recipeId ? "bg-orange-500" : "bg-green-500"}`}
           onPress={handleSubmit}
         >
           <Text className="text-white text-lg font-semibold text-center">

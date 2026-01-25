@@ -1,30 +1,86 @@
-import { View, Text, ScrollView, TouchableOpacity, Image } from "react-native"
-import React, { useEffect, useState } from "react"
-import { useRouter } from "expo-router"
-import { MaterialIcons } from "@expo/vector-icons"
-import { useAuth } from "@/hooks/useAuth"
-import { getRecipeCounts, getRecentRecipes } from "@/services/recipeService"
-import { Recipe } from "@/types/recipe"
+
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from "react-native";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
+import { MaterialIcons } from "@expo/vector-icons";
+import { useAuth } from "@/hooks/useAuth";
+import { getRecipeCounts, getRecentRecipes } from "@/services/recipeService";
+import { Recipe } from "@/types/recipe";
+import { useFocusEffect } from "@react-navigation/native";
 
 const Home = () => {
-  const router = useRouter()
-  const { user } = useAuth()
-  const [recipeCounts, setRecipeCounts] = useState({ total: 0, userRecipes: 0 })
-  const [recentRecipes, setRecentRecipes] = useState<Recipe[]>([])
+  const router = useRouter();
+  const { user } = useAuth();
 
-  useEffect(() => {
-    loadData()
-  }, [])
+  const [recipeCounts, setRecipeCounts] = useState({ total: 0, userRecipes: 0 });
+  const [recentRecipes, setRecentRecipes] = useState<Recipe[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const loadData = async () => {
-    try {
-      const counts = await getRecipeCounts()
-      const recipes = await getRecentRecipes()
-      setRecipeCounts(counts)
-      setRecentRecipes(recipes.slice(0, 3))
-    } catch (error) {
-      console.error("Error loading home data:", error)
-    }
+  // useEffect(() => {
+  //   let mounted = true;
+
+  //   const loadData = async () => {
+  //     try {
+  //       setLoading(true);
+  //       const [counts, recipes] = await Promise.all([
+  //         getRecipeCounts(),
+  //         getRecentRecipes(3),
+  //       ]);
+
+  //       if (!mounted) return;
+
+  //       setRecipeCounts(counts);
+  //       setRecentRecipes(recipes);
+  //     } catch (error) {
+  //       console.error("Home data load error:", error);
+  //     } finally {
+  //       if (mounted) setLoading(false);
+  //     }
+  //   };
+
+  //   loadData();
+
+  //   return () => {
+  //     mounted = false;
+  //   };
+  // }, []);
+useFocusEffect(
+    React.useCallback(() => {
+      let mounted = true;
+
+      const loadData = async () => {
+        try {
+          setLoading(true);
+          const [counts, recipes] = await Promise.all([
+            getRecipeCounts(),
+            getRecentRecipes(3),
+          ]);
+
+          if (!mounted) return;
+
+          setRecipeCounts(counts);
+          setRecentRecipes(recipes);
+        } catch (error) {
+          console.error("Home data load error:", error);
+        } finally {
+          if (mounted) setLoading(false);
+        }
+      };
+
+      loadData();
+
+      return () => {
+        mounted = false;
+      };
+    }, [])   // dependencies ඕන නැහැ මෙතනදි
+  );
+  if (loading) {
+    return (
+      <View className="flex-1 bg-gray-50 justify-center items-center">
+        <ActivityIndicator size="large" color="#f97316" />
+        <Text className="mt-4 text-gray-600">Loading recipes...</Text>
+      </View>
+    );
   }
 
   return (
@@ -43,7 +99,7 @@ const Home = () => {
           <Text className="text-2xl font-bold text-gray-800">{recipeCounts.total}</Text>
           <Text className="text-gray-600 mt-1">Total Recipes</Text>
         </View>
-        
+
         <View className="bg-white p-4 rounded-2xl shadow-lg w-2/5 items-center">
           <Text className="text-2xl font-bold text-gray-800">{recipeCounts.userRecipes}</Text>
           <Text className="text-gray-600 mt-1">Your Recipes</Text>
@@ -54,15 +110,15 @@ const Home = () => {
       <View className="mt-8 px-6">
         <Text className="text-xl font-bold text-gray-800 mb-4">Quick Actions</Text>
         <View className="flex-row justify-between">
-          <TouchableOpacity 
+          <TouchableOpacity
             className="bg-white p-4 rounded-2xl shadow-md w-2/5 items-center"
             onPress={() => router.push("/search")}
           >
             <MaterialIcons name="search" size={32} color="#f97316" />
             <Text className="text-gray-800 font-medium mt-2">Search</Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             className="bg-white p-4 rounded-2xl shadow-md w-2/5 items-center"
             onPress={() => router.push("/recipes/form")}
           >
@@ -83,7 +139,7 @@ const Home = () => {
 
         {recentRecipes.length > 0 ? (
           recentRecipes.map((recipe) => (
-            <TouchableOpacity 
+            <TouchableOpacity
               key={recipe.id}
               className="bg-white p-4 rounded-2xl shadow-md mb-4"
               onPress={() => router.push(`/recipes/${recipe.id}`)}
@@ -100,12 +156,14 @@ const Home = () => {
         ) : (
           <View className="bg-white p-8 rounded-2xl items-center">
             <MaterialIcons name="restaurant" size={48} color="#d1d5db" />
-            <Text className="text-gray-500 mt-4 text-center">No recipes yet. Add your first recipe!</Text>
+            <Text className="text-gray-500 mt-4 text-center">
+              No recipes yet. Add your first one!
+            </Text>
           </View>
         )}
       </View>
     </ScrollView>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;

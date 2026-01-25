@@ -47,32 +47,52 @@ const Recipes = () => {
     }
   }
 
-  const handleDelete = (id: string) => {
-    Alert.alert(
-      "Delete Recipe",
-      "Are you sure you want to delete this recipe?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            showLoader()
-            try {
-              await deleteRecipe(id)
-              fetchRecipes()
-              Alert.alert("Success", "Recipe deleted successfully")
-            } catch {
-              Alert.alert("Error", "Failed to delete recipe")
-            } finally {
-              hideLoader()
+
+const handleDelete = (id: string) => {
+  Alert.alert(
+    "Delete Recipe",
+    "Are you sure you want to delete this recipe?",
+    [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          showLoader()
+          try {
+            console.log('Deleting recipe ID:', id)
+            
+            // Debug - show current recipes
+            console.log('Current recipes before delete:', recipes.map(r => ({id: r.id, title: r.title})))
+            
+            await deleteRecipe(id)
+            
+            // Refresh the list
+            await fetchRecipes()
+            
+            Alert.alert("Success", "Recipe deleted successfully")
+          } catch (error: any) {
+            console.error('Full error deleting recipe:', error)
+            
+            // More specific error messages
+            let errorMessage = "Failed to delete recipe"
+            if (error.message.includes('not authenticated')) {
+              errorMessage = "Please login again"
+            } else if (error.message.includes('Unauthorized')) {
+              errorMessage = "You can only delete your own recipes"
+            } else if (error.message.includes('not found')) {
+              errorMessage = "Recipe not found"
             }
+            
+            Alert.alert("Error", errorMessage)
+          } finally {
+            hideLoader()
           }
         }
-      ]
-    )
-  }
-
+      }
+    ]
+  )
+}
   useFocusEffect(
     useCallback(() => {
       fetchRecipes()
