@@ -136,7 +136,8 @@ const RecipeForm = () => {
 
       {/* Form */}
       <View className="bg-white rounded-2xl p-6 shadow-md">
-        <Text className="text-2xl font-bold text-gray-800 mb-6">
+        <Text className="text-2xl font-bold text-gray-800 mb-6">Hi!</Text>
+        <Text className="text-2xl font-bold text-orange-800 mb-6">
           {recipeId ? "Edit Recipe" : "Add New Recipe"}
         </Text>
 

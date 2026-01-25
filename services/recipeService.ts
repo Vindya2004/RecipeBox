@@ -69,7 +69,7 @@ export const getUserRecipes = async () => {
   const q = query(
     recipesCollection,
     where('userId', '==', user.uid),
-    orderBy('createdAt', 'desc')
+    //orderBy('createdAt', 'desc')
   )
 
   const snapshot = await getDocs(q)
