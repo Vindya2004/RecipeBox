@@ -19,6 +19,43 @@ import { Recipe } from '@/types/recipe'
 const auth = getAuth()
 const recipesCollection = collection(db, 'recipes')
 
+
+// New: Cloudinary config (from your food project)
+const CLOUD_NAME = 'dt7qkhaz9';
+const UPLOAD_PRESET = 'recipe_upload';  // Use your existing preset or create new one
+
+// New: Cloudinary එකට image upload කරන function
+export const uploadImage = async (uri: string): Promise<string> => {
+  try {
+    const formData = new FormData();
+    formData.append('file', {
+      uri,
+      type: 'image/jpeg',
+      name: `recipe-${Date.now()}.jpg`,  // Changed to 'recipe' for naming
+    } as any);
+    formData.append('upload_preset', UPLOAD_PRESET);
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+      {
+        method: 'POST',
+        body: formData,
+      }
+    );
+    const data = await response.json();
+    if (data.secure_url) {
+      console.log('Cloudinary success:', data.secure_url);
+      return data.secure_url;
+    } else {
+      throw new Error(data.error?.message || 'Upload failed');
+    }
+  } catch (error: any) {
+    console.error('Cloudinary error:', error);
+    throw new Error(`Image upload failed: ${error.message}`);
+  }
+};
+
+
+
 export const addRecipe = async (recipeData: Omit<Recipe, 'id' | 'userId' | 'createdAt'>) => {
   const user = auth.currentUser
   if (!user) throw new Error('User not authenticated.')
@@ -57,6 +94,7 @@ export const getAllRecipes = async () => {
       ingredients: data.ingredients as string[],
       instructions: data.instructions as string[],
       userId: data.userId as string,
+      imageUrl: data.imageUrl as string | undefined,
       createdAt: timestamp ? timestamp.toDate().toISOString() : new Date().toISOString()
     }
   })
@@ -89,6 +127,7 @@ export const getUserRecipes = async () => {
       ingredients: data.ingredients as string[],
       instructions: data.instructions as string[],
       userId: data.userId as string,
+      imageUrl: data.imageUrl as string | undefined,
       createdAt: timestamp ? timestamp.toDate().toISOString() : new Date().toISOString()
     }
   })
@@ -114,6 +153,7 @@ export const getRecipeById = async (id: string) => {
     ingredients: data.ingredients as string[],
     instructions: data.instructions as string[],
     userId: data.userId as string,
+     imageUrl: data.imageUrl as string | undefined,
     createdAt: timestamp ? timestamp.toDate().toISOString() : new Date().toISOString()
   }
 }
@@ -279,6 +319,7 @@ export const getRecentRecipes = async (limitNum = 5): Promise<Recipe[]> => {
         ingredients: (data.ingredients as string[]) || [],
         instructions: (data.instructions as string[]) || [],
         userId: (data.userId as string) || "",
+         imageUrl: data.imageUrl as string | undefined,
         createdAt: timestamp ? timestamp.toDate().toISOString() : new Date().toISOString(),
       } satisfies Recipe;
     });
@@ -288,5 +329,177 @@ export const getRecentRecipes = async (limitNum = 5): Promise<Recipe[]> => {
       console.warn("→ Probably missing index or rules issue. Check Firebase console.");
     }
     return [];
+  }
+};
+
+///////////////////////
+export const findRecipesByIngredientsAndTime = async (
+  userIngredients: string[],
+  maxTime: number,
+  limit: number = 5
+): Promise<Recipe[]> => {
+  try {
+    console.log('Searching recipes with:', {
+      ingredients: userIngredients,
+      maxTime: maxTime,
+      limit: limit
+    });
+
+    // 1. Get all recipes from database
+    const allRecipes = await getAllRecipes();
+    
+    if (allRecipes.length === 0) {
+      console.log('No recipes found in database');
+      return [];
+    }
+
+    console.log(`Total recipes in database: ${allRecipes.length}`);
+
+    // 2. Score each recipe based on ingredient matching and time
+    const scoredRecipes = allRecipes.map(recipe => {
+      let score = 0;
+      const matchedIngredients: string[] = [];
+      
+      // Convert both arrays to lowercase for case-insensitive matching
+      const recipeIngredientsLower = recipe.ingredients.map(ing => 
+        ing.toLowerCase().trim()
+      );
+      const userIngredientsLower = userIngredients.map(ing => 
+        ing.toLowerCase().trim()
+      );
+      
+      // Check each user ingredient against recipe ingredients
+      userIngredientsLower.forEach(userIng => {
+        recipeIngredientsLower.forEach(recipeIng => {
+          // Check for exact match or partial match
+          if (
+            recipeIng.includes(userIng) || 
+            userIng.includes(recipeIng) ||
+            recipeIng.split(' ').some(word => userIng.includes(word)) ||
+            userIng.split(' ').some(word => recipeIng.includes(word))
+          ) {
+            score += 2; // Bonus for ingredient match
+            if (!matchedIngredients.includes(userIng)) {
+              matchedIngredients.push(userIng);
+            }
+          }
+        });
+      });
+      
+      // Bonus if recipe has most of user's ingredients
+      const matchPercentage = userIngredients.length > 0 
+        ? matchedIngredients.length / userIngredients.length 
+        : 0;
+      score += matchPercentage * 10;
+      
+      // Time constraint - higher score if within time limit
+      if (recipe.prepTime <= maxTime) {
+        score += 5;
+        // Bonus for recipes that use less time than available
+        const timeBonus = (maxTime - recipe.prepTime) / 10;
+        score += timeBonus;
+      } else {
+        // Penalty for recipes that exceed time limit
+        score -= 3;
+      }
+      
+      // Bonus for recipes with fewer additional ingredients needed
+      const additionalIngredients = Math.max(0, recipe.ingredients.length - matchedIngredients.length);
+      score -= additionalIngredients * 0.5;
+      
+      return {
+        recipe,
+        score,
+        matchedIngredients,
+        matchPercentage,
+        additionalIngredients
+      };
+    });
+
+    // 3. Filter and sort recipes
+    const filteredRecipes = scoredRecipes
+      .filter(item => {
+        // Include recipes that have at least one matching ingredient AND are within time limit
+        return (item.matchedIngredients.length > 0 || item.recipe.prepTime <= maxTime);
+      })
+      .sort((a, b) => b.score - a.score) // Sort by score descending
+      .slice(0, limit) // Take top N recipes
+      .map(item => ({
+        ...item.recipe,
+        matchScore: Math.round(item.score * 100) / 100,
+        matchedIngredients: item.matchedIngredients,
+        matchPercentage: Math.round(item.matchPercentage * 100),
+        additionalIngredients: item.additionalIngredients
+      }));
+
+    console.log(`Found ${filteredRecipes.length} matching recipes`);
+    
+    // Debug: Log the matched recipes
+    filteredRecipes.forEach((recipe, index) => {
+      console.log(`${index + 1}. ${recipe.title} - Score: ${(recipe as any).matchScore}%`);
+    });
+    
+    return filteredRecipes;
+    
+  } catch (error) {
+    console.error('Error in findRecipesByIngredientsAndTime:', error);
+    return [];
+  }
+};
+
+export const generateRecipesFromIngredients = async (
+  userIngredients: string[],
+  availableTime: number
+): Promise<any[]> => {
+  try {
+    // Filter out empty ingredients
+    const filteredIngredients = userIngredients
+      .filter(ing => ing.trim() !== "")
+      .map(ing => ing.trim().toLowerCase());
+    
+    if (filteredIngredients.length === 0) {
+      throw new Error("Please add at least one ingredient");
+    }
+    
+    if (availableTime <= 0) {
+      throw new Error("Please enter a valid time");
+    }
+    
+    console.log('Generating recipes for:', {
+      ingredients: filteredIngredients,
+      time: availableTime
+    });
+    
+    // Find matching recipes from database
+    const matchingRecipes = await findRecipesByIngredientsAndTime(
+      filteredIngredients,
+      availableTime,
+      5 // Limit to 5 recipes
+    );
+    
+    console.log('Matching recipes found:', matchingRecipes.length);
+    
+    // Format the results
+    return matchingRecipes.map(recipe => ({
+      id: recipe.id,
+      title: recipe.title,
+      description: recipe.description,
+      category: recipe.category,
+      prepTime: recipe.prepTime,
+      servings: recipe.servings,
+      difficulty: recipe.difficulty,
+      ingredients: recipe.ingredients,
+      instructions: recipe.instructions,
+      userId: recipe.userId,
+      createdAt: recipe.createdAt,
+      matchScore: (recipe as any).matchScore || 0,
+      matchedIngredients: (recipe as any).matchedIngredients || [],
+      matchPercentage: (recipe as any).matchPercentage || 0,
+      additionalIngredients: (recipe as any).additionalIngredients || 0
+    }));
+    
+  } catch (error: any) {
+    console.error("Error generating recipes:", error);
+    throw error;
   }
 };

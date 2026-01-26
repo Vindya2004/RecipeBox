@@ -10,4 +10,5 @@ export interface Recipe {
   instructions: string[]
   userId: string
   createdAt: string
+  imageUrl?: string  // New field for Cloudinary image URL
 }

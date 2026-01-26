@@ -7,7 +7,11 @@ const tabs = [
   { name: "home", icon: "home", title: "Home" },
   { name: "recipes", icon: "restaurant", title: "Recipes" },
   { name: "search", icon: "search", title: "Search" },
-  { name: "profile", icon: "person", title: "Profile" }
+  { name: "profile", icon: "person", title: "Profile" },
+  { name: "generate", icon: "auto-awesome", title: "Generate" },
+  { name: "about", icon: "info", title: "About" },
+  { name: "settings", icon: "settings", title: "Settings" }
+
 ] as const
 
 const DashboardLayout = () => {
