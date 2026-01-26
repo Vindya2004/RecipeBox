@@ -11,7 +11,8 @@ import {
   updateDoc,
   where,
   Timestamp,
-  limit
+  limit,
+  setDoc
 } from 'firebase/firestore'
 import { db } from './firebase'
 import { Recipe } from '@/types/recipe'
@@ -502,4 +503,44 @@ export const generateRecipesFromIngredients = async (
     console.error("Error generating recipes:", error);
     throw error;
   }
+};
+
+export const addToFavorites = async (recipeId: string) => {
+  const user = auth.currentUser;
+  if (!user) throw new Error('User not authenticated');
+
+  const favRef = doc(db, 'users', user.uid, 'favorites', recipeId);
+  await setDoc(favRef, {
+    addedAt: Timestamp.now(),
+    recipeId, // optional, for reference
+  });
+};
+
+// Remove from favorites
+export const removeFromFavorites = async (recipeId: string) => {
+  const user = auth.currentUser;
+  if (!user) throw new Error('User not authenticated');
+
+  const favRef = doc(db, 'users', user.uid, 'favorites', recipeId);
+  await deleteDoc(favRef);
+};
+
+// Check if a recipe is favorited by current user
+export const isFavorite = async (recipeId: string): Promise<boolean> => {
+  const user = auth.currentUser;
+  if (!user) return false;
+
+  const favRef = doc(db, 'users', user.uid, 'favorites', recipeId);
+  const docSnap = await getDoc(favRef);
+  return docSnap.exists();
+};
+
+// Get all favorited recipe IDs for current user
+export const getFavoriteRecipeIds = async (): Promise<string[]> => {
+  const user = auth.currentUser;
+  if (!user) return [];
+
+  const favsCollection = collection(db, 'users', user.uid, 'favorites');
+  const snapshot = await getDocs(favsCollection);
+  return snapshot.docs.map(doc => doc.id);
 };

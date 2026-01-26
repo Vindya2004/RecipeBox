@@ -9,7 +9,7 @@ const tabs = [
   { name: "search", icon: "search", title: "Search" },
   { name: "profile", icon: "person", title: "Profile" },
   { name: "generate", icon: "auto-awesome", title: "Generate" },
-  { name: "about", icon: "info", title: "About" },
+  { name: "favourite", icon: "favorite-outline", title: "Favourite" },
   { name: "settings", icon: "settings", title: "Settings" }
 
 ] as const

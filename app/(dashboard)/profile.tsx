@@ -43,7 +43,7 @@ const Profile = () => {
     { 
       icon: "favorite", 
       label: "Favorites", 
-      onPress: () => Alert.alert("Coming Soon", "Favorites feature is coming soon!"),
+      onPress: () => router.push("/(dashboard)/favourite"),
       color: "#ef4444"
     },
     { 
