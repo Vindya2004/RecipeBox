@@ -83,7 +83,7 @@ const Home = () => {
       <View className="relative">
         <View className="bg-orange-500 pt-14 pb-20 px-6">
           <Text className="text-white text-4xl font-extrabold tracking-tight">
-            Recipe Finder
+            RecipeBox
           </Text>
           <Text className="text-orange-100/90 text-xl mt-2 font-medium">
             Welcome back, {user?.displayName?.split(" ")[0] || "Chef"}! 🍳

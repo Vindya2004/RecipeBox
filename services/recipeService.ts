@@ -21,18 +21,18 @@ const auth = getAuth()
 const recipesCollection = collection(db, 'recipes')
 
 
-// New: Cloudinary config (from your food project)
-const CLOUD_NAME = 'dt7qkhaz9';
-const UPLOAD_PRESET = 'recipe_upload';  // Use your existing preset or create new one
 
-// New: Cloudinary එකට image upload කරන function
+const CLOUD_NAME = 'dt7qkhaz9';
+const UPLOAD_PRESET = 'recipe_upload';  
+
+
 export const uploadImage = async (uri: string): Promise<string> => {
   try {
     const formData = new FormData();
     formData.append('file', {
       uri,
       type: 'image/jpeg',
-      name: `recipe-${Date.now()}.jpg`,  // Changed to 'recipe' for naming
+      name: `recipe-${Date.now()}.jpg`,  
     } as any);
     formData.append('upload_preset', UPLOAD_PRESET);
     const response = await fetch(
@@ -246,15 +246,6 @@ export const searchRecipes = async (searchQuery: string) => {
   })
 }
 
-// export const getRecipeCounts = async () => {
-//   const allRecipes = await getAllRecipes()
-//   const userRecipes = await getUserRecipes()
-  
-//   return {
-//     total: allRecipes.length,
-//     userRecipes: userRecipes.length
-//   }
-// }
 
 export const getRecipeCounts = async () => {
   try {
@@ -283,13 +274,6 @@ export const getRecipeCounts = async () => {
     return { total: 0, userRecipes: 0 }
   }
 }
-
-// export const getRecentRecipes = async (limit: number = 5) => {
-//   const allRecipes = await getAllRecipes()
-//   return allRecipes.slice(0, limit)
-// }
-
-// ... other imports and functions remain unchanged ...
 
 export const getRecentRecipes = async (limitNum = 5): Promise<Recipe[]> => {
   try {
@@ -333,7 +317,6 @@ export const getRecentRecipes = async (limitNum = 5): Promise<Recipe[]> => {
   }
 };
 
-///////////////////////
 export const findRecipesByIngredientsAndTime = async (
   userIngredients: string[],
   maxTime: number,
