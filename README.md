@@ -1,50 +1,137 @@
-# Welcome to your Expo app 👋
+#🍲📖 RecipeBox – Recipe Management Mobile App
+---
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+## 📌 Project Overview
 
-## Get started
+RecipeBox is a cross-platform mobile application developed using React Native with Expo.
+The app is designed to help users create, store, manage, and explore recipes in a simple and user-friendly way.
+This project focuses on applying real-world mobile application development concepts such as authentication, state management, CRUD operations, and smooth navigation.
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## The application allows users to:
 
-2. Start the app
+Register and log in securely
 
-   ```bash
-   npx expo start
-   ```
+Add new recipes with details
 
-In the output, you'll find options to open the app in a
+View and manage saved recipes
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+Update or delete existing recipes
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+Organize personal recipe collections
 
-## Get a fresh project
+---
 
-When you're ready, run:
+## 🎯 Project Objectives
+
+Develop a cross-platform mobile application using React Native Expo
+
+Implement user authentication
+
+Apply state management concepts
+
+Perform CRUD operations on recipe data
+
+Use modern navigation patterns
+
+Design a clean and responsive UI
+
+Build a fully runnable mobile application
+
+---
+
+## 🛠️ Technologies Used
+### Frontend
+
+React Native
+
+Expo
+
+JavaScript / TypeScript
+
+Expo Router
+
+React Context API (State Management)
+
+React Navigation (Stack & Tab)
+
+
+### Backend / Services
+
+Firebase Authentication
+
+Firebase Firestore (Cloud Database)
+
+---
+
+## 🔐 Authentication
+
+The application uses Firebase Authentication to manage:
+
+User Registration (Sign Up)
+
+User Login (Sign In)
+
+Secure user sessions
+
+Only authenticated users can access core features such as adding, editing, and managing recipes.
+
+---
+
+## 📦 Core Functionality (CRUD)
+
+The main data model of the application is Recipes.
+
+
+### CRUD Operations Implemented:
+
+Create: Add new recipes with relevant details
+
+Read: View all saved recipes
+
+Update: Edit existing recipe information
+
+Delete: Remove unwanted recipes
+
+All recipe data is securely stored and managed using Firebase Firestore.
+
+---
+
+## 📱 User Interface
+
+Mobile-first design
+
+Simple and intuitive layouts
+
+Responsive on different screen sizes
+
+Consistent colors, icons, and spacing
+
+Smooth navigation experience
+
+---
+
+## ▶️ How to Run the Project Locally
+
+### Prerequisites
+
+Node.js (v16 or above recommended)
+
+Expo CLI installed globally
+
+Android Studio Emulator or Physical Mobile Device
+
+
+### Steps
+
+Clone the repo and install:
 
 ```bash
-npm run reset-project
-```
+git clone https://github.com/Vindya2004/RecipeBox
+cd RecipeBox
+npm install
+npx expo start
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
 
-## Learn more
 
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
